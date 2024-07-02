@@ -1,3 +1,5 @@
+package TicketServices;
+
 import ShareMethod.SharingInformation;
 import Users.Admin;
 import Users.Client;
@@ -28,16 +30,16 @@ public class TicketService {
         User adminUser = new Admin();
 
 
-        // Empty Ticket
+        // Empty TicketServices.Ticket
         Ticket emptyTicket = new Ticket();
         ticketService.addTicket(emptyTicket);
 
-        // Full Ticket
+        // Full TicketServices.Ticket
         Ticket fullTicket = new Ticket(1, "Sphear", 111, System.currentTimeMillis(), System.currentTimeMillis(), true, 'C', 10.5,100.25);
         ticketService.addTicket(fullTicket);
 
 
-        // Limited Ticket
+        // Limited TicketServices.Ticket
         Ticket limitedTicket = new Ticket("Sphear", 122, System.currentTimeMillis());
         ticketService.addTicket(limitedTicket);
 
@@ -48,7 +50,7 @@ public class TicketService {
         // Homework4-Task2
         ticketPrinter.print("print content in console");
 
-        // Homework4-Task3 Limited Ticket with stadiumsector and time
+        // Homework4-Task3 Limited TicketServices.Ticket with stadiumsector and time
         Ticket limitedTicket2 = new Ticket('C',System.currentTimeMillis());
         ticketService.addTicket(limitedTicket2);
 
