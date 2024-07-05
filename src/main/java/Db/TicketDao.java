@@ -1,138 +1,70 @@
 package Db;
+
 import Users.User;
-import java.sql.*;
-import java.time.Instant;
-import java.util.ArrayList;
 import TicketServices.Ticket;
 import BusTickets.TicketType;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Repository;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.List;
 
+@Repository
 public class TicketDao {
-    public void saveUser(User user) throws SQLException {
+    private final JdbcTemplate jdbcTemplate;
+
+    @Autowired
+    public TicketDao(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+    }
+
+    public void saveUser(User user) {
         String sql = "INSERT INTO \"User\" (name, creation_date) VALUES (?, ?)";
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-
-            pstmt.setString(1, user.getName());
-            pstmt.setTimestamp(2, Timestamp.valueOf(user.getCreationDate()));
-            pstmt.executeUpdate();
-
-            ResultSet generatedKeys = pstmt.getGeneratedKeys();
-            if (generatedKeys.next()) {
-                user.setId(generatedKeys.getInt(1));
-            }
-        }
+        jdbcTemplate.update(sql, user.getName(), Timestamp.valueOf(user.getCreationDate()));
     }
 
-    // Fetch User by ID
-    public User getUserById(int userId) throws SQLException {
+    public User getUserById(int userId) {
         String sql = "SELECT id, name, creation_date FROM \"User\" WHERE id = ?";
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
-            pstmt.setInt(1, userId);
-            ResultSet rs = pstmt.executeQuery();
-
-            if (rs.next()) {
-                return extractUserFromResultSet(rs);
-            }
-        }
-        return null;
+        return jdbcTemplate.queryForObject(sql, new Object[]{userId}, (rs, rowNum) ->
+                extractUserFromResultSet(rs)
+        );
     }
 
-    // Fetch Tickets
-    public List<Ticket> getTicketsByUserId(int userId) throws SQLException {
+    public List<Ticket> getTicketsByUserId(int userId) {
         String sql = "SELECT id, user_id, ticket_type, creation_date FROM Ticket WHERE user_id = ?";
-        List<Ticket> tickets = new ArrayList<>();
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
-            pstmt.setInt(1, userId);
-            ResultSet rs = pstmt.executeQuery();
-
-            while (rs.next()) {
-                Ticket ticket = extractTicketFromResultSet(rs);
-                tickets.add(ticket);
-            }
-        }
-        return tickets;
+        return jdbcTemplate.query(sql, new Object[]{userId}, (rs, rowNum) ->
+                extractTicketFromResultSet(rs)
+        );
     }
 
-    // Save a new Ticket
-    public void saveTicket(Ticket ticket) throws SQLException {
+    public void saveTicket(Ticket ticket) {
         String sql = "INSERT INTO Ticket (user_id, ticket_type, creation_date) VALUES (?, ?, ?)";
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-
-            pstmt.setInt(1, ticket.getUserId());
-            pstmt.setString(2, ticket.getTicketType().name());
-            pstmt.setTimestamp(3, Timestamp.from(Instant.ofEpochMilli(ticket.getCreationDateMillis())));
-            pstmt.executeUpdate();
-
-            ResultSet generatedKeys = pstmt.getGeneratedKeys();
-            if (generatedKeys.next()) {
-                ticket.setId(generatedKeys.getInt(1));
-            }
-        }
+        jdbcTemplate.update(sql, ticket.getUserId(), ticket.getTicketType().name(),
+                Timestamp.from(Instant.ofEpochMilli(ticket.getCreationDateMillis())));
     }
 
-    // Fetch Ticket
-    public Ticket getTicketById(int ticketId) throws SQLException {
+    public Ticket getTicketById(int ticketId) {
         String sql = "SELECT id, user_id, ticket_type, creation_date FROM Ticket WHERE id = ?";
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
-            pstmt.setInt(1, ticketId);
-            ResultSet rs = pstmt.executeQuery();
-
-            if (rs.next()) {
-                return extractTicketFromResultSet(rs);
-            }
-        }
-        return null; // TicketServices.Ticket not found
+        return jdbcTemplate.queryForObject(sql, new Object[]{ticketId}, (rs, rowNum) ->
+                extractTicketFromResultSet(rs)
+        );
     }
 
-    // Update Ticket
-    public void updateTicketType(int ticketId, TicketType newType) throws SQLException {
+    public void updateTicketType(int ticketId, TicketType newType) {
         String sql = "UPDATE Ticket SET ticket_type = ? WHERE id = ?";
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
-            pstmt.setString(1, newType.name());
-            pstmt.setInt(2, ticketId);
-            pstmt.executeUpdate();
-        }
+        jdbcTemplate.update(sql, newType.name(), ticketId);
     }
 
-    // Delete User
-    public void deleteUserById(int userId) throws SQLException {
+    public void deleteUserById(int userId) {
         String deleteUserSql = "DELETE FROM \"User\" WHERE id = ?";
         String deleteTicketsSql = "DELETE FROM Ticket WHERE user_id = ?";
-        try (Connection conn = DatabaseConnection.getConnection()) {
-            conn.setAutoCommit(false); // Start transaction
-
-            // Delete tickets first
-            try (PreparedStatement pstmtTickets = conn.prepareStatement(deleteTicketsSql)) {
-                pstmtTickets.setInt(1, userId);
-                pstmtTickets.executeUpdate();
-            }
-
-            // Then delete the user
-            try (PreparedStatement pstmtUser = conn.prepareStatement(deleteUserSql)) {
-                pstmtUser.setInt(1, userId);
-                pstmtUser.executeUpdate();
-            }
-
-            conn.commit();
-        } catch (SQLException e) {
-            Connection conn = DatabaseConnection.getConnection();
-            e.printStackTrace();
-            // Rollback transaction if something went wrong
-            conn.rollback();
-            throw e;
-        }
+        jdbcTemplate.update(deleteTicketsSql, userId);
+        jdbcTemplate.update(deleteUserSql, userId);
     }
-
 
     private User extractUserFromResultSet(ResultSet rs) throws SQLException {
         User user = new User();
