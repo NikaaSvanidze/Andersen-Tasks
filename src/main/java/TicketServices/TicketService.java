@@ -1,13 +1,18 @@
+package TicketServices;
+
+import Db.TicketDao;
 import ShareMethod.SharingInformation;
 import Users.Admin;
 import Users.Client;
 import Users.User;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class TicketService {
     private List<Ticket> tickets;
+    private TicketDao ticketDao;
 
     public TicketService() {
         this.tickets = new ArrayList<>();
@@ -15,6 +20,15 @@ public class TicketService {
 
     public void addTicket(Ticket ticket) {
         tickets.add(ticket);
+    }
+
+    @Autowired
+    public void updateStatusAndCreateTicketExample(){
+        User user = ticketDao.getUserById(1); // Assuming user with ID 1 exists
+        Ticket newTicket = new Ticket();
+        newTicket.setUserId(user.getId());
+
+        ticketDao.updateUserStatusAndCreateTicket(user, newTicket);
     }
 
     public static void main(String[] args) {
@@ -27,17 +41,16 @@ public class TicketService {
         User clientUser = new Client();
         User adminUser = new Admin();
 
-
-        // Empty Ticket
+        // Empty TicketServices.Ticket
         Ticket emptyTicket = new Ticket();
         ticketService.addTicket(emptyTicket);
 
-        // Full Ticket
+        // Full TicketServices.Ticket
         Ticket fullTicket = new Ticket(1, "Sphear", 111, System.currentTimeMillis(), System.currentTimeMillis(), true, 'C', 10.5,100.25);
         ticketService.addTicket(fullTicket);
 
 
-        // Limited Ticket
+        // Limited TicketServices.Ticket
         Ticket limitedTicket = new Ticket("Sphear", 122, System.currentTimeMillis());
         ticketService.addTicket(limitedTicket);
 
@@ -48,7 +61,7 @@ public class TicketService {
         // Homework4-Task2
         ticketPrinter.print("print content in console");
 
-        // Homework4-Task3 Limited Ticket with stadiumsector and time
+        // Homework4-Task3 Limited TicketServices.Ticket with stadiumsector and time
         Ticket limitedTicket2 = new Ticket('C',System.currentTimeMillis());
         ticketService.addTicket(limitedTicket2);
 
@@ -66,7 +79,14 @@ public class TicketService {
         ((Client) clientUser).getTicket();
         ((Admin) adminUser).checkTicket();
 
+        //homework11-task1
+        User user1 = new User(1, "nika svanidze");
+        user1.addTicket(fullTicket);
+        user1.addTicket(emptyTicket);
+        System.out.println(user1.getTickets() + "Tickts1-tickets2");
 
+        //homework11-task3
+        ticketService.updateStatusAndCreateTicketExample();
 
         List<Ticket> tickets = ticketService.tickets;
         for(int i = 0; i < tickets.size(); i++) {
