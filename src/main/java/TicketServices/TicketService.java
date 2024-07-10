@@ -1,15 +1,18 @@
 package TicketServices;
 
+import Db.TicketDao;
 import ShareMethod.SharingInformation;
 import Users.Admin;
 import Users.Client;
 import Users.User;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class TicketService {
     private List<Ticket> tickets;
+    private TicketDao ticketDao;
 
     public TicketService() {
         this.tickets = new ArrayList<>();
@@ -17,6 +20,15 @@ public class TicketService {
 
     public void addTicket(Ticket ticket) {
         tickets.add(ticket);
+    }
+
+    @Autowired
+    public void updateStatusAndCreateTicketExample(){
+        User user = ticketDao.getUserById(1); // Assuming user with ID 1 exists
+        Ticket newTicket = new Ticket();
+        newTicket.setUserId(user.getId());
+
+        ticketDao.updateUserStatusAndCreateTicket(user, newTicket);
     }
 
     public static void main(String[] args) {
@@ -28,7 +40,6 @@ public class TicketService {
         // Polymorphism example
         User clientUser = new Client();
         User adminUser = new Admin();
-
 
         // Empty TicketServices.Ticket
         Ticket emptyTicket = new Ticket();
@@ -68,7 +79,14 @@ public class TicketService {
         ((Client) clientUser).getTicket();
         ((Admin) adminUser).checkTicket();
 
+        //homework11-task1
+        User user1 = new User(1, "nika svanidze");
+        user1.addTicket(fullTicket);
+        user1.addTicket(emptyTicket);
+        System.out.println(user1.getTickets() + "Tickts1-tickets2");
 
+        //homework11-task3
+        ticketService.updateStatusAndCreateTicketExample();
 
         List<Ticket> tickets = ticketService.tickets;
         for(int i = 0; i < tickets.size(); i++) {

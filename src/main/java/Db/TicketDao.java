@@ -4,9 +4,11 @@ import Users.User;
 import TicketServices.Ticket;
 import BusTickets.TicketType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import javax.transaction.Transactional;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -16,10 +18,24 @@ import java.util.List;
 @Repository
 public class TicketDao {
     private final JdbcTemplate jdbcTemplate;
+    private final boolean userTicketUpdateEnabled;
 
     @Autowired
-    public TicketDao(JdbcTemplate jdbcTemplate) {
+    public TicketDao(JdbcTemplate jdbcTemplate, @Value("${app.feature.userTicketUpdateEnabled:true}") boolean userTicketUpdateEnabled) {
         this.jdbcTemplate = jdbcTemplate;
+        this.userTicketUpdateEnabled = userTicketUpdateEnabled;
+    }
+    @Transactional
+    public void updateUserStatusAndCreateTicket(User user, Ticket newTicket) {
+        if (!userTicketUpdateEnabled) {
+            throw new UnsupportedOperationException("User and Ticket update feature is currently disabled.");
+        }
+        String updateUserSql = "UPDATE \"User\" SET status = ? WHERE id = ?";
+        jdbcTemplate.update(updateUserSql, "ACTIVATED", user.getId());
+
+        String insertTicketSql = "INSERT INTO Ticket (user_id, ticket_type, creation_date) VALUES (?, ?, ?)";
+        jdbcTemplate.update(insertTicketSql, user.getId(), newTicket.getTicketType().name(),
+                Timestamp.from(Instant.now()));
     }
 
     public void saveUser(User user) {
