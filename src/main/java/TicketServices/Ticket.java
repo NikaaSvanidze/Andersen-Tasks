@@ -1,6 +1,12 @@
+package TicketServices;
+
+import BusTickets.TicketType;
+import Interfaces.IGetAndSetInterface;
+
+
 import java.time.Instant;
 
-public class Ticket {
+public class Ticket implements IGetAndSetInterface{
     private int id;
     private String concertHall;
     private int eventCode;
@@ -10,7 +16,20 @@ public class Ticket {
     private char stadiumSector;
     private double maxAllowedBackpackWeight;
     private double ticketPrice;
+    private int userId;
+    private TicketType ticketType;
 
+    //Get and Set interface methods
+    @Override
+    public int GetId() {
+        return id;
+    }
+
+    @Override
+    public void SetId(int id) {
+        this.id = id;
+    }
+    // Constructors
     public Ticket(){
 
     }
@@ -52,6 +71,43 @@ public class Ticket {
         this.time = time;
     }
 
+    public Ticket(char stadiumSector, long time) {
+        this.stadiumSector = stadiumSector;
+        this.time = time;
+    }
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public int getUserId() {
+        return userId;
+    }
+
+    public void setUserId(int userId) {
+        this.userId = userId;
+    }
+
+    public TicketType getTicketType() {
+        return ticketType;
+    }
+
+    public void setTicketType(TicketType ticketType) {
+        this.ticketType = ticketType;
+    }
+
+    public long getCreationDateMillis() {
+        return creationTime;
+    }
+
+    public void setCreationDateMillis(long creationDateMillis) {
+        this.creationTime = creationDateMillis;
+    }
+
+    //
     public String toString() {
         String promoStatus = isPromo ? "Promo" : "Regular";
         String sector = Character.toString(stadiumSector);
@@ -59,7 +115,7 @@ public class Ticket {
         String formattedEventTime = eventInstant.toString();
         Instant creationInstant = Instant.ofEpochMilli(creationTime);
         String formattedCreationTime = creationInstant.toString();
-        return "Ticket{" +
+        return "TicketServices.Ticket{" +
                 "id='" + id + '\'' +
                 ", concertHall='" + concertHall + '\'' +
                 ", eventCode='" + eventCode + '\'' +
