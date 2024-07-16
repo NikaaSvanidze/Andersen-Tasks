@@ -13,8 +13,3 @@ spring:
       app:
         feature:
           userTicketUpdateEnabled: true
-
-        my:
-          custom:
-            bean:
-              enabled: true

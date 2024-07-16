@@ -1,4 +1,4 @@
-package Db;
+package Configs;
 
 import javax.sql.DataSource;
 import org.springframework.context.annotation.Bean;
