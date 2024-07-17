@@ -1,3 +1,5 @@
+package TicketServices;
+
 import Interfaces.IPrintInterface;
 
 public class TicketPrinter  implements IPrintInterface

@@ -1,5 +1,8 @@
+package TicketServices;
+
+import BusTickets.TicketType;
 import Interfaces.IGetAndSetInterface;
-import Interfaces.IPrintInterface;
+
 
 import java.time.Instant;
 
@@ -13,6 +16,8 @@ public class Ticket implements IGetAndSetInterface{
     private char stadiumSector;
     private double maxAllowedBackpackWeight;
     private double ticketPrice;
+    private int userId;
+    private TicketType ticketType;
 
     //Get and Set interface methods
     @Override
@@ -70,6 +75,38 @@ public class Ticket implements IGetAndSetInterface{
         this.stadiumSector = stadiumSector;
         this.time = time;
     }
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public int getUserId() {
+        return userId;
+    }
+
+    public void setUserId(int userId) {
+        this.userId = userId;
+    }
+
+    public TicketType getTicketType() {
+        return ticketType;
+    }
+
+    public void setTicketType(TicketType ticketType) {
+        this.ticketType = ticketType;
+    }
+
+    public long getCreationDateMillis() {
+        return creationTime;
+    }
+
+    public void setCreationDateMillis(long creationDateMillis) {
+        this.creationTime = creationDateMillis;
+    }
+
     //
     public String toString() {
         String promoStatus = isPromo ? "Promo" : "Regular";
@@ -78,7 +115,7 @@ public class Ticket implements IGetAndSetInterface{
         String formattedEventTime = eventInstant.toString();
         Instant creationInstant = Instant.ofEpochMilli(creationTime);
         String formattedCreationTime = creationInstant.toString();
-        return "Ticket{" +
+        return "TicketServices.Ticket{" +
                 "id='" + id + '\'' +
                 ", concertHall='" + concertHall + '\'' +
                 ", eventCode='" + eventCode + '\'' +
